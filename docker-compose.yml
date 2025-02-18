@@ -1,0 +1,87 @@
+version: "3.7"
+services:
+    # Master Node
+    elasticsearch-master:
+        image: docker.elastic.co/elasticsearch/elasticsearch:8.6.0
+        container_name: elasticsearch-master
+        environment:
+            - node.name=master-node
+            - cluster.name=es-cluster
+            - discovery.seed_hosts=elasticsearch-master,elasticsearch-data1,elasticsearch-data2
+            - cluster.initial_master_nodes=master-node
+            - node.roles=master,remote_cluster_client
+            - network.host=0.0.0.0
+            - xpack.security.enabled=false
+            - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+        ports:
+            - "9200:9200" # REST API
+            - "9300:9300" # Node-to-Node Communication
+        volumes:
+            - es-master-data:/usr/share/elasticsearch/data
+        networks:
+            - elastic
+
+    # Data Node 1
+    elasticsearch-data1:
+        image: docker.elastic.co/elasticsearch/elasticsearch:8.6.0
+        container_name: elasticsearch-data1
+        environment:
+            - node.name=data-node1
+            - cluster.name=es-cluster
+            - discovery.seed_hosts=elasticsearch-master,elasticsearch-data1,elasticsearch-data2
+            - node.roles=data,remote_cluster_client
+            - network.host=0.0.0.0
+            - xpack.security.enabled=false
+            - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+        ports:
+            - "9201:9200"
+            - "9301:9300"
+        volumes:
+            - es-data1:/usr/share/elasticsearch/data
+        networks:
+            - elastic
+
+    # Data Node 2
+    elasticsearch-data2:
+        image: docker.elastic.co/elasticsearch/elasticsearch:8.6.0
+        container_name: elasticsearch-data2
+        environment:
+            - node.name=data-node2
+            - cluster.name=es-cluster
+            - discovery.seed_hosts=elasticsearch-master,elasticsearch-data1,elasticsearch-data2
+            - node.roles=data,remote_cluster_client
+            - network.host=0.0.0.0
+            - xpack.security.enabled=false
+            - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+        ports:
+            - "9202:9200"
+            - "9302:9300"
+        volumes:
+            - es-data2:/usr/share/elasticsearch/data
+        networks:
+            - elastic
+
+    # Kibana
+    kibana:
+        image: docker.elastic.co/kibana/kibana:8.6.0
+        container_name: kibana
+        environment:
+            - ELASTICSEARCH_HOSTS=http://elasticsearch-master:9200
+        ports:
+            - "5601:5601"
+        depends_on:
+            - elasticsearch-master
+        networks:
+            - elastic
+
+volumes:
+    es-master-data:
+        driver: local
+    es-data1:
+        driver: local
+    es-data2:
+        driver: local
+
+networks:
+    elastic:
+        driver: bridge

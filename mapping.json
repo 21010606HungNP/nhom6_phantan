@@ -1,0 +1,40 @@
+{
+    "settings": {
+        "number_of_shards": 4,
+        "number_of_replicas": 1
+    },
+    "mappings": {
+        "properties": {
+            "title": {
+                "type": "text",
+                "fields": {
+                    "autocomplete": {
+                        "type": "search_as_you_type"
+                    },
+                    "fuzzy": {
+                        "type": "text"
+                    }
+                }
+            },
+            "brand_id": { "type": "integer" },
+            "overview": { "type": "text" },
+            "price": { "type": "float" },
+            "fuel": { "type": "keyword" },
+            "year": { "type": "integer" },
+            "location_id": { "type": "integer" },
+            "location_name": { "type": "keyword" },
+            "seats": { "type": "integer" },
+            "image": { "type": "text" },
+            "features": {
+                "type": "nested",
+                "properties": {
+                    "air_conditioner": { "type": "boolean" },
+                    "power_steering": { "type": "boolean" },
+                    "driver_airbag": { "type": "boolean" },
+                    "passenger_airbag": { "type": "boolean" },
+                    "leather_seats": { "type": "boolean" }
+                }
+            }
+        }
+    }
+}
